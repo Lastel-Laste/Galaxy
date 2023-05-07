@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>물리엔진 웹사이트</title>
+    <style>
+      /* 화면 스타일 */
+      body {
+        background-color: black;
+        margin: 0;
+      }
+      canvas {
+        display: block;
+        border: 1px solid black;
+      }
+      #coordinates {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="canvas"></canvas>
+    <div id="coordinates"></div>
+    <script src="object.js"></script>
+    <script src="physics.js"></script>
+    <script>
+      // 캔버스 요소 가져오기
+      const canvas = document.getElementById("canvas");
+
+      // 캔버스 크기 설정
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      // 캔버스 컨텍스트 가져오기
+      const ctx = canvas.getContext("2d");
+
+      // 애니메이션 프레임 함수 정의
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        for (let i = 0; i < balls.length; i++) {
+            balls[i].draw();
+            balls[i].update();
+        }
+        
+        for (let i = 0; i < balls.length; i++) {
+            for (let j = i + 1; j < balls.length; j++) {
+                const dist = distance(balls[i].x, balls[i].y, balls[j].x, balls[j].y);
+                const minDist = balls[i].radius + balls[j].radius;
+                if (dist <= minDist) {
+                    resolveCollision(balls[i], balls[j]);
+                }
+            }
+        }
+    
+        requestAnimationFrame(animate);
+      }
+  
+      // 애니메이션 시작
+      animate();
+    </script>
+  </body>
+</html>
