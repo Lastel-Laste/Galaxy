@@ -1,4 +1,4 @@
-// app.js
+// Main.js
 
 class Particle {
   constructor() {
