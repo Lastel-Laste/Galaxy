@@ -1,1 +1,1 @@
-# Double_Pendulum
+# Galaxy
