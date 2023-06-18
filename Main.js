@@ -12,9 +12,7 @@ class Particle {
     this.mesh.position.z = Math.random() * cubeSize - cubeSize/2;
     this.previousPosition = new THREE.Vector3().copy(this.mesh.position);
 
-    this.velocityX = Math.random() * 0;
-    this.velocityY = Math.random() * 0;
-    this.velocityZ = Math.random() * 0;
+    this.velocity = new THREE.Vector3(Math.random() * 0, Math.random() * 0, Math.random() * 0)
 
     this.mass = radius * radius * 10e8;
     var shape = new CANNON.Sphere(radius);
@@ -30,36 +28,36 @@ class Particle {
 
     this.mesh.position.copy(position);
 
-    this.mesh.position.x += this.velocityX;
-    this.mesh.position.y += this.velocityY;
-    this.mesh.position.z += this.velocityZ;
+    this.mesh.position.x += this.velocity.x;
+    this.mesh.position.y += this.velocity.y;
+    this.mesh.position.z += this.velocity.z;
 
     var boundary = 500;
     var radius = this.mesh.geometry.parameters.radius;
 
-    var restitution = 0.6; // 반발력 계수
+    var restitution = 0.8; // 반발력 계수
 
     // 충돌 판정
     if (this.mesh.position.x - radius < -boundary) {
       this.mesh.position.x = -boundary + radius;
-      this.velocityX *= -restitution; // 반발력 적용
+      this.velocity.x *= -restitution; // 반발력 적용
     } else if (this.mesh.position.x + radius > boundary) {
       this.mesh.position.x = boundary - radius;
-      this.velocityX *= -restitution; // 반발력 적용
+      this.velocity.x *= -restitution; // 반발력 적용
     }
     if (this.mesh.position.y - radius < -boundary) {
       this.mesh.position.y = -boundary + radius;
-      this.velocityY *= -restitution; // 반발력 적용
+      this.velocity.y *= -restitution; // 반발력 적용
     } else if (this.mesh.position.y + radius > boundary) {
       this.mesh.position.y = boundary - radius;
-      this.velocityY *= -restitution; // 반발력 적용
+      this.velocity.y *= -restitution; // 반발력 적용
     }
     if (this.mesh.position.z - radius < -boundary) {
       this.mesh.position.z = -boundary + radius;
-      this.velocityZ *= -restitution; // 반발력 적용
+      this.velocity.z *= -restitution; // 반발력 적용
     } else if (this.mesh.position.z + radius > boundary) {
       this.mesh.position.z = boundary - radius;
-      this.velocityZ *= -restitution; // 반발력 적용
+      this.velocity.z *= -restitution; // 반발력 적용
     }
 
     // 파티클 충돌 검사
@@ -221,7 +219,7 @@ function handleCollision(particleA, particleB) {
     
     // 겹침
     const overlap = (particleA.mesh.geometry.parameters.radius + particleB.mesh.geometry.parameters.radius) - distance;
-
+    
     // 두 파티클 사이의 중심 방향 벡터
     const direction = new THREE.Vector3(dx / distance, dy / distance, dz / distance);
 
@@ -237,8 +235,8 @@ function handleCollision(particleA, particleB) {
     const normal = new THREE.Vector3(dx, dy, dz).normalize();
 
     // 충돌 이전의 속도 벡터
-    const velocity1 = new THREE.Vector3(particleA.velocityX, particleA.velocityY, particleA.velocityZ);
-    const velocity2 = new THREE.Vector3(particleB.velocityX, particleB.velocityY, particleB.velocityZ);
+    const velocity1 = new THREE.Vector3(particleA.velocity.x, particleA.velocity.y, particleA.velocity.z);
+    const velocity2 = new THREE.Vector3(particleB.velocity.x, particleB.velocity.y, particleB.velocity.z);
 
     // 운동량 보존을 이용한 속도 벡터 계산
     const restitution = 0.8; // 반발력 계수
@@ -247,12 +245,8 @@ function handleCollision(particleA, particleB) {
     const impulse = (1 + restitution) * velocityDiff.dot(normal) / massSum;
     const impulseVector = normal.clone().multiplyScalar(impulse);
 
-    particleA.velocityX -= impulseVector.x * particleB.mass;
-    particleA.velocityY -= impulseVector.y * particleB.mass;
-    particleA.velocityZ -= impulseVector.z * particleB.mass;
-    particleB.velocityX += impulseVector.x * particleA.mass;
-    particleB.velocityY += impulseVector.y * particleA.mass;
-    particleB.velocityZ += impulseVector.z * particleA.mass;
+    particleA.velocity.sub(impulseVector.clone().multiplyScalar(particleB.mass));
+    particleB.velocity.add(impulseVector.clone().multiplyScalar(particleA.mass));
   }
 }
 
@@ -279,11 +273,6 @@ function applyGravitation(particle1, particle2) {
   const az2 = -fz / particle2.mass;
 
   // 속도 갱신
-  particle1.velocityX += ax1;
-  particle1.velocityY += ay1;
-  particle1.velocityZ += az1;
-
-  particle2.velocityX += ax2;
-  particle2.velocityY += ay2;
-  particle2.velocityZ += az2;
+  particle1.velocity.add(new THREE.Vector3(ax1, ay1, az1));
+  particle2.velocity.add(new THREE.Vector3(ax2, ay2, az2));
 }
