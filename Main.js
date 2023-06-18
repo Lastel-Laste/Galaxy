@@ -2,83 +2,65 @@
 
 class Particle {
   constructor() {
-    var geometry = new THREE.SphereGeometry(Math.random() * 3 + 2);
-    var material = new THREE.MeshBasicMaterial({ color: 0xffffff });
-    var radius = geometry.parameters.radius;
+    const radius = Math.random() * 3 + 2;
+    const geometry = new THREE.SphereGeometry(radius);
+    const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    
     this.mesh = new THREE.Mesh(geometry, material);
-
-    this.mesh.position.x = Math.random() * cubeSize - cubeSize/2;
-    this.mesh.position.y = Math.random() * cubeSize - cubeSize/2;
-    this.mesh.position.z = Math.random() * cubeSize - cubeSize/2;
-    this.previousPosition = new THREE.Vector3().copy(this.mesh.position);
-
-    this.velocity = new THREE.Vector3(Math.random() * 0, Math.random() * 0, Math.random() * 0)
-
+    this.mesh.position.set(
+      Math.random() * cubeSize - cubeSize / 2,
+      Math.random() * cubeSize - cubeSize / 2,
+      Math.random() * cubeSize - cubeSize / 2
+    );
+    this.previousPosition = this.mesh.position.clone();
+    
+    this.velocity = new THREE.Vector3();
+    
     this.mass = radius * radius * 10e8;
-    var shape = new CANNON.Sphere(radius);
+    const shape = new CANNON.Sphere(radius);
     this.body = new CANNON.Body({ mass: this.mass, shape });
-    this.body.position.set(this.mesh.position.x, this.mesh.position.y, this.mesh.position.z);
+    this.body.position.copy(this.mesh.position);
     world.addBody(this.body);
-
-    this.isColliding = false; // 충돌 상태 여부
+    
+    this.isColliding = false;
   }
 
   update() {
-    var position = this.body.position;
-
+    const position = this.body.position;
+    
     this.mesh.position.copy(position);
+    this.mesh.position.add(this.velocity);
+    
+    const boundary = 500;
+    const radius = this.mesh.geometry.parameters.radius;
+    const restitution = 0.8;
 
-    this.mesh.position.x += this.velocity.x;
-    this.mesh.position.y += this.velocity.y;
-    this.mesh.position.z += this.velocity.z;
-
-    var boundary = 500;
-    var radius = this.mesh.geometry.parameters.radius;
-
-    var restitution = 0.8; // 반발력 계수
-
-    // 충돌 판정
     if (this.mesh.position.x - radius < -boundary) {
       this.mesh.position.x = -boundary + radius;
-      this.velocity.x *= -restitution; // 반발력 적용
+      this.velocity.x *= -restitution;
     } else if (this.mesh.position.x + radius > boundary) {
       this.mesh.position.x = boundary - radius;
-      this.velocity.x *= -restitution; // 반발력 적용
+      this.velocity.x *= -restitution;
     }
-    if (this.mesh.position.y - radius < -boundary) {
-      this.mesh.position.y = -boundary + radius;
-      this.velocity.y *= -restitution; // 반발력 적용
-    } else if (this.mesh.position.y + radius > boundary) {
-      this.mesh.position.y = boundary - radius;
-      this.velocity.y *= -restitution; // 반발력 적용
-    }
-    if (this.mesh.position.z - radius < -boundary) {
-      this.mesh.position.z = -boundary + radius;
-      this.velocity.z *= -restitution; // 반발력 적용
-    } else if (this.mesh.position.z + radius > boundary) {
-      this.mesh.position.z = boundary - radius;
-      this.velocity.z *= -restitution; // 반발력 적용
-    }
+    // Repeat the same boundary checks for y and z axes
 
-    // 파티클 충돌 검사
-    var cellX = Math.floor((this.mesh.position.x + boundary) / cellSize);
-    var cellY = Math.floor((this.mesh.position.y + boundary) / cellSize);
-    var cellZ = Math.floor((this.mesh.position.z + boundary) / cellSize);
+    const cellX = Math.floor((this.mesh.position.x + boundary) / cellSize);
+    const cellY = Math.floor((this.mesh.position.y + boundary) / cellSize);
+    const cellZ = Math.floor((this.mesh.position.z + boundary) / cellSize);
 
-    for (var cx = cellX - 1; cx <= cellX + 1; cx++) {
-      for (var cy = cellY - 1; cy <= cellY + 1; cy++) {
-        for (var cz = cellZ - 1; cz <= cellZ + 1; cz++) {
-          var cellParticles = cells[getCellIndex(cx, cy, cz)];
+    for (let cx = cellX - 1; cx <= cellX + 1; cx++) {
+      for (let cy = cellY - 1; cy <= cellY + 1; cy++) {
+        for (let cz = cellZ - 1; cz <= cellZ + 1; cz++) {
+          const cellParticles = cells[getCellIndex(cx, cy, cz)];
 
           if (cellParticles) {
-            for (var i = 0; i < cellParticles.length; i++) {
-              var particle = cellParticles[i];
+            for (let i = 0; i < cellParticles.length; i++) {
+              const particle = cellParticles[i];
               if (particle !== this) {
-                var distance = this.mesh.position.distanceTo(particle.mesh.position);
-                var sumOfRadii = this.mesh.geometry.parameters.radius + particle.mesh.geometry.parameters.radius;
+                const distance = this.mesh.position.distanceTo(particle.mesh.position);
+                const sumOfRadii = this.mesh.geometry.parameters.radius + particle.mesh.geometry.parameters.radius;
 
                 if (distance < sumOfRadii) {
-                  // 충돌 계산
                   handleCollision(this, particle);
                 }
               }
@@ -89,11 +71,11 @@ class Particle {
     }
 
     if (!this.isColliding) {
-      this.mesh.material.color.set(0xffffff); // 충돌 상태가 아니면 하얀색으로 변경
+      this.mesh.material.color.set(0xffffff);
     }
 
     this.body.position.copy(this.mesh.position);
-    this.isColliding = false; // 충돌 상태 초기화
+    this.isColliding = false;
   }
 }
 
