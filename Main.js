@@ -35,14 +35,28 @@ class Particle {
     const radius = this.mesh.geometry.parameters.radius;
     const restitution = 0.8;
 
+    // 경계 충돌 판정
     if (this.mesh.position.x - radius < -boundary) {
       this.mesh.position.x = -boundary + radius;
-      this.velocity.x *= -restitution;
+      this.velocity.x *= -restitution; 
     } else if (this.mesh.position.x + radius > boundary) {
       this.mesh.position.x = boundary - radius;
-      this.velocity.x *= -restitution;
+      this.velocity.x *= -restitution; 
     }
-    // Repeat the same boundary checks for y and z axes
+    if (this.mesh.position.y - radius < -boundary) {
+      this.mesh.position.y = -boundary + radius;
+      this.velocity.y *= -restitution; 
+    } else if (this.mesh.position.y + radius > boundary) {
+      this.mesh.position.y = boundary - radius;
+      this.velocity.y *= -restitution; 
+    }
+    if (this.mesh.position.z - radius < -boundary) {
+      this.mesh.position.z = -boundary + radius;
+      this.velocity.z *= -restitution; 
+    } else if (this.mesh.position.z + radius > boundary) {
+      this.mesh.position.z = boundary - radius;
+      this.velocity.z *= -restitution; 
+    }
 
     const cellX = Math.floor((this.mesh.position.x + boundary) / cellSize);
     const cellY = Math.floor((this.mesh.position.y + boundary) / cellSize);
