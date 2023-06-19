@@ -20,7 +20,6 @@ class Particle {
     const shape = new CANNON.Sphere(radius);
     this.body = new CANNON.Body({ mass: this.mass, shape });
     this.body.position.copy(this.mesh.position);
-    world.addBody(this.body);
     
     this.isColliding = false;
   }
@@ -116,10 +115,6 @@ function init() {
   particles = [];
   cells = new Array(cellDivide * cellDivide * cellDivide);
 
-  // Cannon.js world creation
-  world = new CANNON.World();
-  world.gravity.set(0, 0, 0); // 중력
-
   for (var i = 0; i < 1000; i++) {
     var particle = new Particle();
     scene.add(particle.mesh);
@@ -145,9 +140,6 @@ function init() {
 
 function animate() {
   requestAnimationFrame(animate);
-
-  // Update Cannon.js physics simulation
-  world.step(1 / 60);
 
   // Update particle positions and rotations based on physics simulation
   for (var i = 0; i < particles.length; i++) {
