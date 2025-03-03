@@ -1,4 +1,13 @@
-// Particle 클래스 (회전 및 관성 모멘트 반영)
+// Main.js
+
+var scene, camera, renderer, particles = [];
+var cubeSize = 1000;
+var numParticles = 1000;
+var world;
+var G = 6.674e-11; // 만유인력 상수
+var softening = 1; // 중력 계산 시 최소 거리(softening factor)
+
+// Particle 클래스 선언: init() 호출 전에 정의되어야 함
 class Particle {
   constructor() {
     // 반지름: 2 ~ 5 사이의 임의 값
@@ -17,7 +26,7 @@ class Particle {
     // 부피에 비례한 질량 (스케일은 시뮬레이션에 맞게 조정)
     this.mass = (4/3) * Math.PI * Math.pow(this.radius, 3) * 1e6;
     
-    // Cannon.js 바디 생성 (회전 활성화)
+    // Cannon.js 바디 생성 (회전 및 각운동량 반영)
     var shape = new CANNON.Sphere(this.radius);
     this.body = new CANNON.Body({ mass: this.mass, shape: shape });
     this.body.position.copy(this.mesh.position);
@@ -68,16 +77,6 @@ class Particle {
   }
 }
 
-var scene, camera, renderer, particles = [];
-var cubeSize = 1000;
-var numParticles = 1000;
-var world;
-var G = 6.674e-11; // 만유인력 상수
-var softening = 1; // 중력 계산 시 최소 거리(softening factor)
-
-init();
-animate();
-
 function init() {
   // Three.js 씬 초기화
   scene = new THREE.Scene();
@@ -122,7 +121,7 @@ function animate(time) {
   
   if (lastTime !== undefined) {
     var dt = (time - lastTime) / 1000;
-    // 고정 시간 간격으로 물리 연산 수행 (필요시 accumulator 사용 가능)
+    // 고정 시간 간격으로 물리 연산 수행
     world.step(fixedTimeStep, dt);
     
     // 입자 간 중력 계산 (O(n²); 입자 수가 많으면 Barnes-Hut나 옥트리 기반 알고리즘 고려)
@@ -158,3 +157,6 @@ function animate(time) {
   
   renderer.render(scene, camera);
 }
+
+init();
+animate();
