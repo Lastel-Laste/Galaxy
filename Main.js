@@ -1,49 +1,3 @@
-var scene, camera, renderer, particles = [];
-var cubeSize = 1000;
-var numParticles = 1000;
-var world;
-var G = 6.674e-11; // 만유인력 상수
-var softening = 1; // 중력 계산 시 최소 거리(softening factor)
-
-init();
-animate();
-
-function init() {
-  // Three.js 씬 초기화
-  scene = new THREE.Scene();
-  
-  camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 10000);
-  camera.position.set(1200, 1200, 2000);
-  camera.lookAt(scene.position);
-  
-  // 경계 구역 시각화 (와이어프레임 큐브)
-  var cubeGeometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
-  var edges = new THREE.EdgesGeometry(cubeGeometry);
-  var line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0xffffff }));
-  scene.add(line);
-  
-  renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  document.body.appendChild(renderer.domElement);
-  
-  // Cannon.js 물리 월드 초기화
-  world = new CANNON.World();
-  world.gravity.set(0, 0, 0); // 전역 중력은 0, 각 입자 간 중력으로 적용
-  // SAPBroadphase 사용 (cell 기반보다 효율적)
-  world.broadphase = new CANNON.SAPBroadphase(world);
-  world.solver.iterations = 10;
-  
-  // 입자 생성
-  for (var i = 0; i < numParticles; i++) {
-    var particle = new Particle();
-    particles.push(particle);
-    scene.add(particle.mesh);
-    world.addBody(particle.body);
-  }
-  
-  addMouseListeners();
-}
-
 // Particle 클래스 (회전 및 관성 모멘트 반영)
 class Particle {
   constructor() {
@@ -112,6 +66,52 @@ class Particle {
       this.body.velocity.z *= -restitution;
     }
   }
+}
+
+var scene, camera, renderer, particles = [];
+var cubeSize = 1000;
+var numParticles = 1000;
+var world;
+var G = 6.674e-11; // 만유인력 상수
+var softening = 1; // 중력 계산 시 최소 거리(softening factor)
+
+init();
+animate();
+
+function init() {
+  // Three.js 씬 초기화
+  scene = new THREE.Scene();
+  
+  camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 10000);
+  camera.position.set(1200, 1200, 2000);
+  camera.lookAt(scene.position);
+  
+  // 경계 구역 시각화 (와이어프레임 큐브)
+  var cubeGeometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
+  var edges = new THREE.EdgesGeometry(cubeGeometry);
+  var line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0xffffff }));
+  scene.add(line);
+  
+  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild(renderer.domElement);
+  
+  // Cannon.js 물리 월드 초기화
+  world = new CANNON.World();
+  world.gravity.set(0, 0, 0); // 전역 중력은 0, 각 입자 간 중력으로 적용
+  // SAPBroadphase 사용 (cell 기반보다 효율적)
+  world.broadphase = new CANNON.SAPBroadphase(world);
+  world.solver.iterations = 10;
+  
+  // 입자 생성
+  for (var i = 0; i < numParticles; i++) {
+    var particle = new Particle();
+    particles.push(particle);
+    scene.add(particle.mesh);
+    world.addBody(particle.body);
+  }
+  
+  addMouseListeners();
 }
 
 var lastTime;
