@@ -1,6 +1,5 @@
 // Main.js
 
-// 전역 변수 선언
 var scene, camera, renderer, particles = [];
 var cubeSize = 1000;
 var numParticles = 1000;
@@ -8,13 +7,13 @@ var world;
 var G = 6.674e-11; // 만유인력 상수
 var softening = 1; // 중력 계산 시 최소 거리(softening factor)
 
-// Particle 클래스는 반드시 init() 함수 호출 전에 선언되어야 합니다.
+// Particle 클래스는 init() 함수보다 먼저 정의되어야 합니다.
 class Particle {
   constructor() {
     // 반지름: 2 ~ 5 사이의 임의 값
     this.radius = Math.random() * 3 + 2;
     
-    // Three.js 메쉬 생성
+    // MeshPhongMaterial은 조명이 필요하므로, 조명을 추가해야 합니다.
     var geometry = new THREE.SphereGeometry(this.radius, 16, 16);
     var material = new THREE.MeshPhongMaterial({ color: 0xffffff });
     this.mesh = new THREE.Mesh(geometry, material);
@@ -85,6 +84,14 @@ function init() {
   camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 10000);
   camera.position.set(1200, 1200, 2000);
   camera.lookAt(scene.position);
+  
+  // 조명 추가 (MeshPhongMaterial 사용 시 필수)
+  var ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+  scene.add(ambientLight);
+  
+  var directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+  directionalLight.position.set(1, 1, 1);
+  scene.add(directionalLight);
   
   // 경계 구역 시각화 (와이어프레임 큐브)
   var cubeGeometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
@@ -159,6 +166,5 @@ function animate(time) {
   renderer.render(scene, camera);
 }
 
-// window.onload 또는 body의 마지막에 스크립트를 두면 안전하게 초기화가 가능합니다.
 init();
 animate();
