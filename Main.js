@@ -31,6 +31,8 @@ class Particle {
     var shape = new CANNON.Sphere(this.radius);
     this.body = new CANNON.Body({ mass: this.mass, shape: shape });
     this.body.position.copy(this.mesh.position);
+    this.body.velocity.x = Math.random() * 10 -5;
+    this.body.velocity.y = Math.random() * 10 -5;
     
     // 선형 및 각 감쇠 (마찰 효과)
     this.body.linearDamping = 0.01;
