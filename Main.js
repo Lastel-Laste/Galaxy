@@ -13,7 +13,6 @@ class Particle {
   constructor() {
     // 반지름: 2 ~ 5 사이의 임의 값
     this.radius = Math.random() * 3 + 2;
-    
     // MeshBasicMaterial은 조명이 없어도 동일하게 흰색으로 보임
     var geometry = new THREE.SphereGeometry(this.radius, 16, 16);
     var material = new THREE.MeshBasicMaterial({ color: 0xffffff });
@@ -23,6 +22,7 @@ class Particle {
       Math.random() * cubeSize - cubeSize / 2,
       Math.random() * cubeSize - cubeSize / 2
     );
+    this.body.velocity.set(Math.random() *10-5 , Math.random() *10-5, Math.random() *10-5);
     
     // 부피에 비례한 질량 (스케일은 시뮬레이션에 맞게 조정)
     this.mass = (4 / 3) * Math.PI * Math.pow(this.radius, 3) * 1e6;
@@ -31,8 +31,6 @@ class Particle {
     var shape = new CANNON.Sphere(this.radius);
     this.body = new CANNON.Body({ mass: this.mass, shape: shape });
     this.body.position.copy(this.mesh.position);
-    this.body.velocity.x = Math.random() * 10 -5;
-    this.body.velocity.y = Math.random() * 10 -5;
     
     // 선형 및 각 감쇠 (마찰 효과)
     this.body.linearDamping = 0.01;
