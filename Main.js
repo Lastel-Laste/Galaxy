@@ -1,5 +1,6 @@
 // Main.js
 
+// 전역 변수 선언
 var scene, camera, renderer, particles = [];
 var cubeSize = 1000;
 var numParticles = 1000;
@@ -7,7 +8,7 @@ var world;
 var G = 6.674e-11; // 만유인력 상수
 var softening = 1; // 중력 계산 시 최소 거리(softening factor)
 
-// Particle 클래스 선언: init() 호출 전에 정의되어야 함
+// Particle 클래스는 반드시 init() 함수 호출 전에 선언되어야 합니다.
 class Particle {
   constructor() {
     // 반지름: 2 ~ 5 사이의 임의 값
@@ -97,7 +98,7 @@ function init() {
   
   // Cannon.js 물리 월드 초기화
   world = new CANNON.World();
-  world.gravity.set(0, 0, 0); // 전역 중력은 0, 각 입자 간 중력으로 적용
+  world.gravity.set(0, 0, 0); // 전역 중력은 0, 입자 간 중력으로 적용
   // SAPBroadphase 사용 (cell 기반보다 효율적)
   world.broadphase = new CANNON.SAPBroadphase(world);
   world.solver.iterations = 10;
@@ -124,7 +125,7 @@ function animate(time) {
     // 고정 시간 간격으로 물리 연산 수행
     world.step(fixedTimeStep, dt);
     
-    // 입자 간 중력 계산 (O(n²); 입자 수가 많으면 Barnes-Hut나 옥트리 기반 알고리즘 고려)
+    // 입자 간 중력 계산 (입자 수가 많으면 Barnes-Hut나 옥트리 기반 알고리즘 고려)
     for (let i = 0; i < particles.length; i++) {
       for (let j = i + 1; j < particles.length; j++) {
         let p1 = particles[i];
@@ -158,5 +159,6 @@ function animate(time) {
   renderer.render(scene, camera);
 }
 
+// window.onload 또는 body의 마지막에 스크립트를 두면 안전하게 초기화가 가능합니다.
 init();
 animate();
