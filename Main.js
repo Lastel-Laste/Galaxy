@@ -22,7 +22,6 @@ class Particle {
       Math.random() * cubeSize - cubeSize / 2,
       Math.random() * cubeSize - cubeSize / 2
     );
-    this.body.velocity.set(Math.random() *10-5 , Math.random() *10-5, Math.random() *10-5);
     
     // 부피에 비례한 질량 (스케일은 시뮬레이션에 맞게 조정)
     this.mass = (4 / 3) * Math.PI * Math.pow(this.radius, 3) * 1e6;
@@ -31,6 +30,9 @@ class Particle {
     var shape = new CANNON.Sphere(this.radius);
     this.body = new CANNON.Body({ mass: this.mass, shape: shape });
     this.body.position.copy(this.mesh.position);
+    this.body.velocity = new CANNON.Vec3(Math.random() *10-5,
+                                         Math.random() *10-5,
+                                         Math.random() *10-5);
     
     // 선형 및 각 감쇠 (마찰 효과)
     this.body.linearDamping = 0.01;
