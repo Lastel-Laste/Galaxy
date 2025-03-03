@@ -1,5 +1,42 @@
 // Main.js
 
+// Particle 클래스 정의 (init() 호출 전에 정의)
+class Particle {
+  constructor() {
+    // 반경: 2~5 사이 (랜덤)
+    this.radius = Math.random() * 3 + 2;
+    var geometry = new THREE.SphereGeometry(this.radius, 16, 16);
+    // MeshPhongMaterial 사용하여 조명 효과 적용 (회전 등 변화가 눈에 띔)
+    var material = new THREE.MeshPhongMaterial({ color: 0xffffff });
+    this.mesh = new THREE.Mesh(geometry, material);
+    this.mesh.position.set(
+      Math.random() * cubeSize - cubeSize / 2,
+      Math.random() * cubeSize - cubeSize / 2,
+      Math.random() * cubeSize - cubeSize / 2
+    );
+    
+    // 질량: 부피에 비례하도록 (예시)
+    this.mass = Math.pow(this.radius, 3);
+    var shape = new CANNON.Sphere(this.radius);
+    this.body = new CANNON.Body({ mass: this.mass, shape: shape });
+    this.body.position.copy(this.mesh.position);
+    // Cannon.js에서는 회전도 계산하므로 fixedRotation 설정 없이 둡니다.
+    
+    // 선형 및 각 감쇠: 약간의 마찰 효과 반영
+    this.body.linearDamping = 0.01;
+    this.body.angularDamping = 0.01;
+    
+    // 기본 재질 할당 (defaultMaterial은 나중에 init()에서 초기화됨)
+    this.body.material = defaultMaterial;
+  }
+  
+  update() {
+    // Cannon.js가 계산한 위치와 회전 정보를 Three.js 메쉬에 반영
+    this.mesh.position.copy(this.body.position);
+    this.mesh.quaternion.copy(this.body.quaternion);
+  }
+}
+
 var scene, camera, renderer, world;
 var particles = [];
 var cubeSize = 1000;
@@ -53,43 +90,6 @@ function init() {
   
   // 마우스 이벤트 리스너 추가 (FPSCounter.js, MouseEvent.js는 그대로 사용)
   addMouseListeners();
-}
-
-// Particle 클래스 (회전 관련 처리 그대로 유지)
-class Particle {
-  constructor() {
-    // 반경: 2~5 사이 (랜덤)
-    this.radius = Math.random() * 3 + 2;
-    var geometry = new THREE.SphereGeometry(this.radius, 16, 16);
-    // MeshPhongMaterial 사용하여 조명 효과 적용 (회전 등 변화가 눈에 띔)
-    var material = new THREE.MeshPhongMaterial({ color: 0xffffff });
-    this.mesh = new THREE.Mesh(geometry, material);
-    this.mesh.position.set(
-      Math.random() * cubeSize - cubeSize / 2,
-      Math.random() * cubeSize - cubeSize / 2,
-      Math.random() * cubeSize - cubeSize / 2
-    );
-    
-    // 질량: 부피에 비례하도록 (예시)
-    this.mass = Math.pow(this.radius, 3);
-    var shape = new CANNON.Sphere(this.radius);
-    this.body = new CANNON.Body({ mass: this.mass, shape: shape });
-    this.body.position.copy(this.mesh.position);
-    // Cannon.js에서는 회전도 계산하므로 fixedRotation 설정 없이 둡니다.
-    
-    // 선형 및 각 감쇠: 약간의 마찰 효과 반영
-    this.body.linearDamping = 0.01;
-    this.body.angularDamping = 0.01;
-    
-    // 기본 재질 할당
-    this.body.material = defaultMaterial;
-  }
-  
-  update() {
-    // Cannon.js가 계산한 위치와 회전 정보를 Three.js 메쉬에 반영
-    this.mesh.position.copy(this.body.position);
-    this.mesh.quaternion.copy(this.body.quaternion);
-  }
 }
 
 // 고정 타임스텝 관련 변수
